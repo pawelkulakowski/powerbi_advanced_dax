@@ -45,6 +45,68 @@ CONCATENATEX(
     ASC
 )
 
+- AVERAGEX() - AVERAGE AND AVERAGEX do not count days with zero sales; if needed use insteead DIVIDE AND COUNTROWS
+
+
+Average Daily Sales = 
+AVERAGEX(
+    'Calendar',
+    [Customer Sales]
+)
+
+- Moving Averages using AVERAGEX
+
+Moving average (AVERAGEX) = 
+VAR LastTransactionDate = MAX('Calendar'[Transaction_Date])
+VAR AverageDay = 30 -- can be used here a parameter
+VAR PeriodInVisual = 
+FILTER(
+    ALL(
+        'Calendar'[Transaction_Date]
+    ),
+    AND(
+        'Calendar'[Transaction_Date] > LastTransactionDate - AverageDay,
+        'Calendar'[Transaction_Date] <= LastTransactionDate
+    )
+)
+
+VAR OutPut =
+CALCULATE(
+    AVERAGEX(
+        'Calendar',
+        [Customer Sales]
+    ),
+    PeriodInVisual
+)
+
+RETURN
+OutPut
+
+- RANKX() - if "total" row is showing a rank of 1, IF & HASONEVALUE with RANKX
+
+Top 5 Products by Profit (RANKX) = 
+VAR ProfitRank = 
+IF(
+    HASONEVALUE(
+        'Product Lookup'[product_category]
+    ),
+    RANKX(
+        ALL(
+            'Product Lookup'[product]
+        ),
+        [Profit]
+    )
+)
+
+VAR Top5Products = 
+IF(
+    ProfitRank <= 5,
+    [Profit]
+)
+
+RETURN
+Top5Products
+
 5. Performance tuning
 
 6. Scalar functions
